@@ -35,7 +35,7 @@
 
         var effects = layer.property("ADBE Effect Parade");
         addSlider(effects, "Start", 0);
-        addSlider(effects, "End", 75);
+        addSlider(effects, "End", 100);
         addSlider(effects, "Offset", 0);
         addSlider(effects, "Circle Size", 300);
         addSlider(effects, "Stroke Width", 20);

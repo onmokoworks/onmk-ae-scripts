@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Preset Viewer</title></head>
+<body data-panel="viewer">
+  <header class="panel-header">
+    <span class="panel-title">Preset Viewer</span>
+    <button id="refresh" class="header-button" title="Refresh">↻</button>
+    <button id="menuButton" class="header-button hamburger" title="Panel menu"><i></i><i></i><i></i></button>
+  </header>
+  <aside id="settingsMenu" class="settings-menu">
+    <div class="menu-label">PRESET LIBRARY</div>
+    <div id="folderName" class="menu-path">No folder selected</div>
+    <div class="menu-actions"><button id="chooseFolder">Choose Folder…</button><button id="revealFolder">Reveal</button></div>
+  </aside>
+  <div class="search-wrap"><input id="search" type="search" placeholder="Search presets…"></div>
+  <main id="grid" class="preset-grid"></main>
+  <footer class="actions">
+    <span id="status" class="status">No library selected</span>
+    <button id="deletePreset" class="danger">Delete</button>
+    <button id="capture" class="secondary">Capture PNG</button>
+    <button id="apply" class="primary">Apply</button>
+  </footer>
+  <script src="cep.js"></script><script src="viewer.js"></script>
+</body>
+</html>

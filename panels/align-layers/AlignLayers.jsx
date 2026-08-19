@@ -1,56 +1,50 @@
 (function alignLayersPanel(thisObj) {
     var PANEL_NAME = "Align Layers";
-    var ACCENT = [0.0, 0.82, 1.0, 1.0];
+    var ACCENT = [0.78, 0.78, 0.78, 1.0];
 
     var win = (thisObj instanceof Panel) ?
         thisObj : new Window("palette", PANEL_NAME, undefined, { resizeable: true });
     win.orientation = "column";
     win.alignChildren = ["fill", "top"];
-    win.spacing = 5;
-    win.margins = 7;
+    win.spacing = 2;
+    win.margins = 4;
 
     var targetRow = win.add("group");
     targetRow.orientation = "row";
     targetRow.alignChildren = ["left", "center"];
     targetRow.add("statictext", undefined, "Align To");
-    var alignTarget = targetRow.add("dropdownlist", undefined, ["Selection", "Composition"]);
-    alignTarget.selection = 0;
-    alignTarget.alignment = ["fill", "center"];
+    var targetSelection = targetRow.add("radiobutton", undefined, "Selection");
+    var targetComposition = targetRow.add("radiobutton", undefined, "Composition");
+    targetSelection.value = true;
 
     var alignPanel = win.add("panel", undefined, "Align");
-    alignPanel.orientation = "column";
+    alignPanel.orientation = "row";
     alignPanel.alignChildren = ["fill", "top"];
-    alignPanel.margins = 7;
-    alignPanel.spacing = 3;
+    alignPanel.margins = 4;
+    alignPanel.spacing = 2;
 
-    var horizontalRow = alignPanel.add("group");
-    horizontalRow.orientation = "row";
-    horizontalRow.alignChildren = ["fill", "fill"];
-    horizontalRow.spacing = 3;
-
-    var verticalRow = alignPanel.add("group");
-    verticalRow.orientation = "row";
-    verticalRow.alignChildren = ["fill", "fill"];
-    verticalRow.spacing = 3;
+    var alignRow = alignPanel.add("group");
+    alignRow.orientation = "row";
+    alignRow.alignChildren = ["left", "center"];
+    alignRow.spacing = 2;
 
     var distributePanel = win.add("panel", undefined, "Distribute Centers");
     distributePanel.orientation = "row";
-    distributePanel.alignChildren = ["fill", "fill"];
-    distributePanel.margins = 7;
-    distributePanel.spacing = 3;
+    distributePanel.alignChildren = ["left", "center"];
+    distributePanel.margins = 4;
+    distributePanel.spacing = 2;
 
     function makeIconButton(parent, kind, tip) {
         var button = parent.add("button", undefined, "");
-        button.preferredSize = [38, 30];
-        button.minimumSize = [28, 26];
-        button.alignment = ["fill", "fill"];
+        button.preferredSize = [30, 24];
+        button.minimumSize = [30, 24];
+        button.maximumSize = [30, 24];
+        button.alignment = ["left", "center"];
         button.helpTip = tip;
         button._iconKind = kind;
         button.onDraw = function() {
             var g = this.graphics;
-            var w = this.size.width;
-            var h = this.size.height;
-            var pen = g.newPen(g.PenType.SOLID_COLOR, ACCENT, 2);
+            var pen = g.newPen(g.PenType.SOLID_COLOR, ACCENT, 1.5);
             var brush = g.newBrush(g.BrushType.SOLID_COLOR, ACCENT);
 
             function line(x1, y1, x2, y2) {
@@ -65,43 +59,49 @@
                 g.fillPath(brush);
             }
 
-            if (kind === "left" || kind === "hcenter" || kind === "right") {
-                var axisX = kind === "left" ? 8 : (kind === "right" ? w - 8 : w / 2);
-                line(axisX, 5, axisX, h - 5);
-                if (kind === "left") {
-                    box(axisX + 3, 7, 13, 5); box(axisX + 3, 17, 19, 5);
-                } else if (kind === "right") {
-                    box(axisX - 16, 7, 13, 5); box(axisX - 22, 17, 19, 5);
-                } else {
-                    box(axisX - 7, 7, 14, 5); box(axisX - 11, 17, 22, 5);
-                }
-            } else if (kind === "top" || kind === "vcenter" || kind === "bottom") {
-                var axisY = kind === "top" ? 6 : (kind === "bottom" ? h - 6 : h / 2);
-                line(7, axisY, w - 7, axisY);
-                if (kind === "top") {
-                    box(10, axisY + 3, 6, 13); box(22, axisY + 3, 6, 19);
-                } else if (kind === "bottom") {
-                    box(10, axisY - 16, 6, 13); box(22, axisY - 22, 6, 19);
-                } else {
-                    box(10, axisY - 7, 6, 14); box(22, axisY - 11, 6, 22);
-                }
+            if (kind === "left") {
+                line(5, 4, 5, 20);
+                box(8, 6, 10, 4);
+                box(8, 14, 16, 4);
+            } else if (kind === "hcenter") {
+                line(15, 3, 15, 21);
+                box(10, 6, 10, 4);
+                box(7, 14, 16, 4);
+            } else if (kind === "right") {
+                line(25, 4, 25, 20);
+                box(12, 6, 10, 4);
+                box(6, 14, 16, 4);
+            } else if (kind === "top") {
+                line(5, 4, 25, 4);
+                box(8, 7, 4, 9);
+                box(18, 7, 4, 13);
+            } else if (kind === "vcenter") {
+                line(4, 12, 26, 12);
+                box(8, 7, 4, 10);
+                box(18, 5, 4, 14);
+            } else if (kind === "bottom") {
+                line(5, 20, 25, 20);
+                box(8, 8, 4, 9);
+                box(18, 5, 4, 12);
             } else if (kind === "distributeH") {
-                line(7, 5, 7, h - 5); line(w - 7, 5, w - 7, h - 5);
-                box(10, 11, 5, 10); box(w / 2 - 2, 8, 5, 16); box(w - 15, 11, 5, 10);
+                box(5, 8, 4, 8);
+                box(13, 5, 4, 14);
+                box(21, 7, 4, 10);
             } else if (kind === "distributeV") {
-                line(6, 6, w - 6, 6); line(6, h - 6, w - 6, h - 6);
-                box(12, 9, 14, 4); box(9, h / 2 - 2, 20, 4); box(12, h - 13, 14, 4);
+                box(10, 4, 10, 3);
+                box(6, 10, 18, 3);
+                box(8, 17, 14, 3);
             }
         };
         return button;
     }
 
-    var btnLeft = makeIconButton(horizontalRow, "left", "Align Left");
-    var btnHCenter = makeIconButton(horizontalRow, "hcenter", "Align Horizontal Center");
-    var btnRight = makeIconButton(horizontalRow, "right", "Align Right");
-    var btnTop = makeIconButton(verticalRow, "top", "Align Top");
-    var btnVCenter = makeIconButton(verticalRow, "vcenter", "Align Vertical Center");
-    var btnBottom = makeIconButton(verticalRow, "bottom", "Align Bottom");
+    var btnLeft = makeIconButton(alignRow, "left", "Align Left");
+    var btnHCenter = makeIconButton(alignRow, "hcenter", "Align Horizontal Center");
+    var btnRight = makeIconButton(alignRow, "right", "Align Right");
+    var btnTop = makeIconButton(alignRow, "top", "Align Top");
+    var btnVCenter = makeIconButton(alignRow, "vcenter", "Align Vertical Center");
+    var btnBottom = makeIconButton(alignRow, "bottom", "Align Bottom");
     var btnDistributeH = makeIconButton(distributePanel, "distributeH", "Distribute Horizontal Centers");
     var btnDistributeV = makeIconButton(distributePanel, "distributeV", "Distribute Vertical Centers");
 
@@ -199,7 +199,7 @@
     }
 
     function unionBounds(bounds, comp) {
-        if (alignTarget.selection.index === 1) {
+        if (targetComposition.value) {
             return { left: 0, right: comp.width, top: 0, bottom: comp.height };
         }
         var result = {
@@ -216,7 +216,7 @@
     }
 
     function align(kind) {
-        var minimum = alignTarget.selection.index === 1 ? 1 : 2;
+        var minimum = targetComposition.value ? 1 : 2;
         var context = getContext(minimum);
         if (!context) { return; }
         var bounds = collectBounds(context);
@@ -280,7 +280,7 @@
 
     win.onResizing = win.onResize = function() { this.layout.resize(); };
     if (win instanceof Window) {
-        win.preferredSize = [176, 184];
+        win.preferredSize = [205, 122];
         win.center();
         win.show();
     } else {

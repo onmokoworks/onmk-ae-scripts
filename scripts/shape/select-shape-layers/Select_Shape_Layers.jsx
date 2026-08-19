@@ -4,7 +4,8 @@
     Select Shape Layers
     Adobe After Effects ExtendScript
 
-    Keep only shape layers selected from the current layer selection.
+    Keep only shape layers from the current selection.
+    When no layer is selected, select every shape layer in the composition.
 */
 
 (function selectShapeLayers() {
@@ -12,22 +13,26 @@
     var comp = app.project ? app.project.activeItem : null;
 
     if (!(comp instanceof CompItem)) {
-        alert("コンポジションを開いて、レイヤーを選択してください。", scriptName);
+        alert("コンポジションを開いてください。", scriptName);
         return;
     }
 
     var selectedLayers = comp.selectedLayers;
-    if (!selectedLayers || selectedLayers.length === 0) {
-        alert("レイヤーを選択してください。", scriptName);
-        return;
-    }
-
     var shapeLayers = [];
+    var searchAllLayers = !selectedLayers || selectedLayers.length === 0;
     var i;
 
-    for (i = 0; i < selectedLayers.length; i++) {
-        if (selectedLayers[i].property("ADBE Root Vectors Group") !== null) {
-            shapeLayers.push(selectedLayers[i]);
+    if (searchAllLayers) {
+        for (i = 1; i <= comp.numLayers; i++) {
+            if (comp.layer(i).property("ADBE Root Vectors Group") !== null) {
+                shapeLayers.push(comp.layer(i));
+            }
+        }
+    } else {
+        for (i = 0; i < selectedLayers.length; i++) {
+            if (selectedLayers[i].property("ADBE Root Vectors Group") !== null) {
+                shapeLayers.push(selectedLayers[i]);
+            }
         }
     }
 
@@ -44,6 +49,8 @@
     }
 
     if (shapeLayers.length === 0) {
-        alert("選択中のレイヤーにシェイプレイヤーがありません。", scriptName);
+        alert(searchAllLayers ?
+            "コンポジションにシェイプレイヤーがありません。" :
+            "選択中のレイヤーにシェイプレイヤーがありません。", scriptName);
     }
 }());

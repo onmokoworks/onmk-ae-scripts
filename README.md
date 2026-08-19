@@ -6,6 +6,7 @@ Adobe After Effects 用の ExtendScript（JSX）をまとめるモノレポで�
 
 - `scripts/` — `ファイル > スクリプト` から実行する単発スクリプト
 - `panels/` — `ScriptUI Panels` に配置するドッキング可能なパネル
+- `extensions/` — HTML/CSSで構築するCEP拡張パネル
 - `presets/` — Animation Preset と、その生成用スクリプト
 - `tools/` — 共通のビルド、検証、配布ツール
 - `templates/` — 新しいスクリプト／パネル用の再利用可能なテンプレート
@@ -15,12 +16,15 @@ Adobe After Effects 用の ExtendScript（JSX）をまとめるモノレポで�
 `scripts/` 配下は用途別に分類します。
 
 - `shape/` — シェイプの生成、選択、パス、塗りと線
+- `text/` — テキストレイヤーの生成と選択
 - `transform/` — 反転、スケール、位置などの変形
 - `markers/` — マーカーの追加と書き出し
 - `masks/` — マスク操作
 - `composition/` — コンポジション構造と尺の操作
 - `timeline/` — イン点、アウト点などタイムライン編集
 - `system/` — キャッシュなどAfter Effects全体の操作
+- `project/` — プロジェクトファイルと保存場所の操作
+- `property/` — 選択プロパティの制御と変換
 
 KBar用SVGがある場合は、対応するJSXと同じベース名にします（例: `Tool.jsx` / `Tool.svg`）。
 
@@ -33,9 +37,12 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 | Change Mask Mode | 選択レイヤーのマスクモードを一括変更 | `scripts/masks/change-mask-mode/ChangeMaskMode.jsx` |
 | Export Markers | コンポジション／レイヤーマーカーを書き出し | `scripts/markers/export-markers/ExportMarkers.jsx` |
 | Match Nested Comp Duration | ネストコンポジションの尺を親または選択レイヤーへ合わせる | `scripts/composition/match-nested-comp-duration/MatchNestedCompDuration.jsx` |
+| Duplicate Comp Hierarchy | 選択中または現在のコンポと子コンポを参照関係ごと複製してフォルダへ格納 | `scripts/composition/duplicate-comp-hierarchy/Duplicate_Comp_Hierarchy.jsx` |
+| Create Comp Size White Solid | コンポサイズ・コンポ尺の白平面を作成 | `scripts/composition/create-comp-size-white-solid/Create_Comp_Size_White_Solid.jsx` |
 | Nulls From Selected Shape Paths | 選択したシェイプパスから Null を作成 | `scripts/shape/nulls-from-selected-shape-paths/Nulls_From_Selected_Shape_Paths.jsx` |
 | Swap Fill / Stroke Colors | シェイプ／テキストの塗りと線を表示状態ごと交換 | `scripts/shape/swap-fill-stroke-colors/Swap_Fill_Stroke_Colors.jsx` |
-| Select Shape Layers | 現在の選択からシェイプレイヤーだけを選択 | `scripts/shape/select-shape-layers/Select_Shape_Layers.jsx` |
+| Select Shape Layers | 選択範囲、未選択時はコンポ全体からシェイプレイヤーだけを選択 | `scripts/shape/select-shape-layers/Select_Shape_Layers.jsx` |
+| Select Text Layers | 選択範囲、未選択時はコンポ全体からテキストレイヤーだけを選択 | `scripts/text/select-text-layers/Select_Text_Layers.jsx` |
 | Create Shape Style Controller | 選択したシェイプレイヤーの塗りと線を一括操作する Null を作成 | `scripts/shape/create-shape-style-controller/Create_Shape_Style_Controller.jsx` |
 | Toggle Fill | 選択したシェイプ／テキストの塗りを切り替え | `scripts/shape/add-fill-stroke/Toggle_Fill.jsx` |
 | Toggle Stroke | 選択したシェイプ／テキストの線を切り替え | `scripts/shape/add-fill-stroke/Toggle_Stroke.jsx` |
@@ -45,7 +52,11 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 | Link Scale Dimensions | スライダーの結果をScaleへベイクしてコントロールを削除 | `scripts/transform/flip-tools/Link_Scale_Dimensions.jsx` |
 | Set In Point | 選択レイヤーのイン点を再生位置へ設定 | `scripts/timeline/trim-layer/Set_In_Point.jsx` |
 | Set Out Point | 選択レイヤーのアウト点を再生位置へ設定 | `scripts/timeline/trim-layer/Set_Out_Point.jsx` |
+| Trim To First Selected | 選択配列の先頭レイヤーへ他のイン点・アウト点を揃える | `scripts/timeline/trim-to-first-selected/Trim_To_First_Selected.jsx` |
+| Trim To Last Selected | 選択配列の末尾レイヤーへ他のイン点・アウト点を揃える | `scripts/timeline/trim-to-last-selected/Trim_To_Last_Selected.jsx` |
 | Purge All Caches | RAM・ディスク・Undo・Snapshotキャッシュを一括削除 | `scripts/system/purge-all-caches/Purge_All_Caches.jsx` |
+| Open Project Parent Folder | 保存中のプロジェクトフォルダの一つ上をFinder／Explorerで開く | `scripts/project/open-project-parent-folder/Open_Project_Parent_Folder.jsx` |
+| Add Slider Control | 選択した数値プロパティへ現在値・キーフレーム付きのスライダー制御を追加 | `scripts/property/add-slider-control/Add_Slider_Control.jsx` |
 
 ## Panels
 
@@ -61,6 +72,12 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 | Purge All Caches | キャッシュを一括または種類別に削除 | `panels/purge-all-caches/PurgeAllCaches.jsx` |
 | Scale KF Paste |相対的な動きを保ってスケールキーフレームをコピー＆ペースト | `panels/scale-kf-paste/ScaleKF_Paste.jsx` |
 | Shape Fill Stroke | Illustrator風UIでシェイプの塗りと線を操作 | `panels/shape-fill-stroke/ShapeFillStroke.jsx` |
+
+## CEP Extensions
+
+| 名前 | 概要 | エントリーポイント |
+| --- | --- | --- |
+| Animation Preset Viewer / Save | HTML製のFFXサムネイルビューアと保存パネル | `extensions/animation-preset-library/CSXS/manifest.xml` |
 
 ## Presets
 
