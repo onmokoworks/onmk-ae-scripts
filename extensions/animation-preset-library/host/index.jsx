@@ -3,6 +3,9 @@
     var api = $._onmkPresets;
     var SECTION = "onmk Animation Preset Library";
     var KEY = "libraryFolder";
+    var FOLDER_FFX = "Animation Presets";
+    var FOLDER_COMPS = "Composition Templates";
+    var FOLDER_PROJECTS = "Project Templates";
 
     function library() {
         try {
@@ -12,6 +15,18 @@
             }
         } catch (error) {}
         return null;
+    }
+    function categoryFolder(name) {
+        var root = library();
+        if (!root) { return null; }
+        var folder = new Folder(root.fsName + "/" + name);
+        if (!folder.exists && !folder.create()) { return root; }
+        return folder;
+    }
+    function ensureCategoryFolders() {
+        categoryFolder(FOLDER_FFX);
+        categoryFolder(FOLDER_COMPS);
+        categoryFolder(FOLDER_PROJECTS);
     }
     function jsonEscape(text) {
         return String(text).replace(/\\/g, "\\\\").replace(/"/g, "\\\"").replace(/\r/g, "\\r").replace(/\n/g, "\\n");
@@ -82,6 +97,7 @@
         var chosen = Folder.selectDialog("FFXライブラリフォルダを選択", library());
         if (!chosen) { return api.getLibrary(); }
         app.settings.saveSetting(SECTION, KEY, chosen.fsName);
+        ensureCategoryFolders();
         return chosen.fsName;
     };
     api.revealLibrary = function() { var folder = library(); if (folder) { folder.execute(); } return ""; };
@@ -248,6 +264,7 @@
     api.saveSelected = function() {
         var folder = library();
         if (!folder) { return "Choose a library folder"; }
+        var presetFolder = categoryFolder(FOLDER_FFX);
         var comp = app.project && app.project.activeItem;
         if (!comp || !(comp instanceof CompItem)) { return "Open a composition"; }
 
@@ -264,7 +281,7 @@
         for (var i = 0; i < names.length; i++) { commandId = app.findMenuCommandId(names[i]); if (commandId > 0) { break; } }
         if (!commandId) { return "Save Animation Preset command not found"; }
         var previous = Folder.current;
-        try { Folder.current = folder; app.executeCommand(commandId); return "Save dialog closed"; }
+        try { Folder.current = presetFolder; app.executeCommand(commandId); return "Save dialog closed"; }
         catch (error) { return "Error: " + error.message; }
         finally {
             Folder.current = previous;
@@ -280,12 +297,13 @@
     api.saveProjectCopy = function() {
         var folder = library();
         if (!folder) { return "Choose a library folder"; }
+        var projectFolder = categoryFolder(FOLDER_PROJECTS);
         if (!app.project || !app.project.file) { return "Save the current AEP first"; }
 
         try {
             app.project.save();
             var source = app.project.file;
-            var suggested = new File(folder.fsName + "/" + source.name);
+            var suggested = new File(projectFolder.fsName + "/" + source.name);
             var destination = suggested.saveDlg("Save AEP template", "After Effects Project:*.aep");
             if (!destination) { return "Canceled"; }
             if (!/\.aep$/i.test(destination.name)) {
@@ -301,6 +319,7 @@
     api.saveActiveCompTemplate = function() {
         var folder = library();
         if (!folder) { return "Choose a library folder"; }
+        var compFolder = categoryFolder(FOLDER_COMPS);
         var sourceProject = app.project;
         var sourceComp = sourceProject && sourceProject.activeItem;
         if (!sourceProject || !sourceProject.file) { return "Save the current AEP first"; }
@@ -309,7 +328,7 @@
         var sourceFile = new File(sourceProject.file.fsName);
         var sourceComment = sourceComp.comment;
         var marker = "__ONMK_COMP_TEMPLATE_" + new Date().getTime() + "__";
-        var suggested = new File(folder.fsName + "/" + sourceComp.name.replace(/[\\\/:*?\"<>|]/g, "_") + ".aep");
+        var suggested = new File(compFolder.fsName + "/" + sourceComp.name.replace(/[\\\/:*?\"<>|]/g, "_") + ".aep");
         var destination = suggested.saveDlg("Save composition template", "After Effects Project:*.aep");
         if (!destination) { return "Canceled"; }
         if (!/\.aep$/i.test(destination.name)) {
