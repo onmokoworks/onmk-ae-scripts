@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="bookmarks.css"><title>Comp Bookmarks</title></head>
+<body data-panel="bookmarks">
+  <header class="panel-header">
+    <span class="panel-title">Comp Bookmarks</span>
+    <button id="addBookmark" class="header-button add-button" title="Bookmark active composition">＋</button>
+    <button id="refresh" class="header-button" title="Refresh">↻</button>
+    <button id="menuButton" class="header-button hamburger" title="Panel menu"><i></i><i></i><i></i></button>
+  </header>
+  <aside id="settingsMenu" class="settings-menu">
+    <div class="menu-label">APPEARANCE</div>
+    <button id="themeButton" class="theme-button"><span id="themeSwatch" class="theme-swatch"></span>Theme Color…</button>
+    <input id="themeColor" class="theme-picker" type="color" value="#9b63d5">
+  </aside>
+  <div class="search-wrap"><input id="search" type="search" placeholder="Search bookmarked comps…"></div>
+  <main id="grid" class="preset-grid"></main>
+  <footer class="actions">
+    <span id="status" class="status">No bookmarks</span>
+    <button id="removeBookmark" class="danger">Delete</button>
+    <button id="capture" class="secondary">Capture PNG</button>
+    <button id="openComp" class="primary">Open</button>
+  </footer>
+  <script src="cep.js"></script><script src="bookmarks.js"></script>
+</body>
+</html>

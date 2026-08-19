@@ -87,7 +87,6 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 | <img src="panels/align-layers/AlignLayers.svg" width="24" height="24" alt=""> **Align Layers** | 2D／3Dレイヤーを選択範囲またはコンポ基準で整列・均等配置 |
 | <img src="panels/alpha-to-mask/AlphaToMask.svg" width="24" height="24" alt=""> **Alpha To Mask** | オートトレースしたマスクをレイヤーへ分割 |
 | **Change Footage Framerate** | フッテージとコンポジションのフレームレートを変更 |
-| **Comp Bookmarks** | コンポジションをブックマーク管理 |
 | **Dependency Graph** | プロジェクトの依存関係をHTMLグラフとして表示 |
 | **Flip Tools** | レイヤーの反転とスケール連携を操作 |
 | **Marker Editor** | 選択レイヤーのマーカー色とコメントを編集 |
@@ -100,6 +99,7 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 | パネル | 概要 |
 | --- | --- |
 | **Animation Preset Viewer / Save** | FFX・コンポ・プロジェクトを種類別フォルダへ整理し、サムネイル付きで保存・閲覧・適用するHTMLパネル |
+| **Comp Bookmarks** | AEPごとにコンポをカード形式でブックマークし、検索・サムネイル撮影・ダブルクリックで開くHTMLパネル |
 
 ## Presets
 

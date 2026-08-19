@@ -7,6 +7,7 @@
   <ExtensionList>
     <Extension Id="com.onmk.animationpresets.viewer" Version="1.0.0"/>
     <Extension Id="com.onmk.animationpresets.save" Version="1.0.0"/>
+    <Extension Id="com.onmk.animationpresets.bookmarks" Version="1.0.0"/>
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList><Host Name="AEFT" Version="[13.0,99.9]"/></HostList>
@@ -45,6 +46,23 @@
         <UI>
           <Type>Panel</Type><Menu>Preset Save</Menu>
           <Geometry><Size><Height>260</Height><Width>320</Width></Size><MinSize><Height>170</Height><Width>220</Width></MinSize></Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+    <Extension Id="com.onmk.animationpresets.bookmarks">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./client/bookmarks.html</MainPath>
+          <ScriptPath>./host/index.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--allow-file-access-from-files</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle><AutoVisible>true</AutoVisible></Lifecycle>
+        <UI>
+          <Type>Panel</Type><Menu>Comp Bookmarks</Menu>
+          <Geometry><Size><Height>420</Height><Width>360</Width></Size><MinSize><Height>220</Height><Width>240</Width></MinSize></Geometry>
         </UI>
       </DispatchInfo>
     </Extension>

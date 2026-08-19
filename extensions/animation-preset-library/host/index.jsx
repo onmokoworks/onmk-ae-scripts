@@ -29,6 +29,61 @@
         categoryFolder(FOLDER_COMPS);
         categoryFolder(FOLDER_PROJECTS);
     }
+    function projectBookmarkKey() {
+        if (!app.project || !app.project.file) { return ""; }
+        var text = app.project.file.fsName.toLowerCase();
+        var hash = 2166136261;
+        for (var i = 0; i < text.length; i++) {
+            hash ^= text.charCodeAt(i);
+            hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+        }
+        return "compBookmarks_" + (hash >>> 0).toString(16);
+    }
+    function readBookmarkIds() {
+        var key = projectBookmarkKey();
+        if (!key) { return []; }
+        try {
+            if (app.settings.haveSetting(SECTION, key)) {
+                var raw = app.settings.getSetting(SECTION, key);
+                if (!raw) { return []; }
+                var values = raw.split(",");
+                var ids = [];
+                for (var i = 0; i < values.length; i++) {
+                    var id = parseInt(values[i], 10);
+                    if (!isNaN(id)) { ids.push(id); }
+                }
+                return ids;
+            }
+        } catch (error) {}
+        return [];
+    }
+    function writeBookmarkIds(ids) {
+        var key = projectBookmarkKey();
+        if (!key) { return false; }
+        app.settings.saveSetting(SECTION, key, ids.join(","));
+        return true;
+    }
+    function findCompById(id) {
+        if (!app.project) { return null; }
+        for (var i = 1; i <= app.project.numItems; i++) {
+            var item = app.project.item(i);
+            if (item instanceof CompItem && item.id === id) { return item; }
+        }
+        return null;
+    }
+    function bookmarkCacheFolder() {
+        var key = projectBookmarkKey();
+        if (!key) { return null; }
+        var root = new Folder(Folder.userData.fsName + "/onmk/Comp Bookmarks");
+        if (!root.exists) { root.create(); }
+        var folder = new Folder(root.fsName + "/" + key);
+        if (!folder.exists) { folder.create(); }
+        return folder;
+    }
+    function bookmarkThumbnail(id) {
+        var folder = bookmarkCacheFolder();
+        return folder ? new File(folder.fsName + "/" + id + ".png") : null;
+    }
     function jsonEscape(text) {
         return String(text).replace(/\\/g, "\\\\").replace(/"/g, "\\\"").replace(/\r/g, "\\r").replace(/\n/g, "\\n");
     }
@@ -110,6 +165,129 @@
             app.settings.saveSetting(SECTION, THEME_KEY, color);
         }
         return api.getTheme();
+    };
+    api.listCompBookmarks = function() {
+        if (!app.project || !app.project.file) {
+            return '{"error":"Save the AEP to use bookmarks","items":[]}';
+        }
+        var ids = readBookmarkIds();
+        var validIds = [];
+        var parts = [];
+        for (var i = 0; i < ids.length; i++) {
+            var comp = findCompById(ids[i]);
+            if (!comp) { continue; }
+            validIds.push(ids[i]);
+            var png = bookmarkThumbnail(ids[i]);
+            parts.push('{"id":' + ids[i] +
+                ',"name":"' + jsonEscape(comp.name) +
+                '","width":' + comp.width +
+                ',"height":' + comp.height +
+                ',"fps":' + comp.frameRate +
+                ',"duration":' + comp.duration +
+                ',"thumbnail":"' + (png && png.exists ? jsonEscape(fileUrl(png)) : "") +
+                '","stamp":' + (png && png.exists ? png.modified.getTime() : 0) + '}');
+        }
+        if (validIds.length !== ids.length) { writeBookmarkIds(validIds); }
+        return '{"error":"","items":[' + parts.join(",") + ']}';
+    };
+    api.addActiveCompBookmark = function() {
+        if (!app.project || !app.project.file) { return "Save the AEP first"; }
+        var comp = app.project.activeItem;
+        if (!comp || !(comp instanceof CompItem)) { return "Open a composition first"; }
+        var ids = readBookmarkIds();
+        for (var i = 0; i < ids.length; i++) {
+            if (ids[i] === comp.id) { return "Already bookmarked " + comp.name; }
+        }
+        ids.push(comp.id);
+        writeBookmarkIds(ids);
+        return "Bookmarked " + comp.name;
+    };
+    api.removeCompBookmark = function(idText) {
+        var id = parseInt(idText, 10);
+        var ids = readBookmarkIds();
+        var kept = [];
+        for (var i = 0; i < ids.length; i++) {
+            if (ids[i] !== id) { kept.push(ids[i]); }
+        }
+        writeBookmarkIds(kept);
+        var png = bookmarkThumbnail(id);
+        if (png && png.exists) { png.remove(); }
+        return "Bookmark removed";
+    };
+    api.openCompBookmark = function(idText) {
+        var comp = findCompById(parseInt(idText, 10));
+        if (!comp) { return "Composition not found"; }
+        comp.openInViewer();
+        return "Opened " + comp.name;
+    };
+    api.captureCompBookmark = function(idText) {
+        var comp = findCompById(parseInt(idText, 10));
+        if (!comp) { return "Composition not found"; }
+        var png = bookmarkThumbnail(comp.id);
+        if (!png) { return "Save the AEP first"; }
+        var queue = app.project.renderQueue;
+        var queueStates = [];
+        var renderComp = null;
+        var renderItem = null;
+
+        function findPngTemplate(outputModule) {
+            var templates = outputModule.templates;
+            for (var i = 0; i < templates.length; i++) {
+                try {
+                    outputModule.applyTemplate(templates[i]);
+                    outputModule = renderItem.outputModule(1);
+                    var settings = outputModule.getSettings(GetSettingsFormat.STRING);
+                    if (/PNG/i.test(settings.Format) && /Alpha/i.test(settings.Channels)) { return templates[i]; }
+                } catch (error) {}
+            }
+            return null;
+        }
+
+        try {
+            for (var queueIndex = 1; queueIndex <= queue.numItems; queueIndex++) {
+                queueStates.push(queue.item(queueIndex).render);
+                queue.item(queueIndex).render = false;
+            }
+            renderComp = comp.duplicate();
+            renderComp.name = "__onmk_comp_bookmark_thumbnail__";
+            var siblings = png.parent.getFiles(png.name + "*");
+            for (var siblingIndex = 0; siblingIndex < siblings.length; siblingIndex++) {
+                if (siblings[siblingIndex] instanceof File) { siblings[siblingIndex].remove(); }
+            }
+            renderItem = queue.items.add(renderComp);
+            renderItem.timeSpanStart = comp.time;
+            renderItem.timeSpanDuration = comp.frameDuration;
+            var outputModule = renderItem.outputModule(1);
+            var template = findPngTemplate(outputModule);
+            if (!template) { throw new Error("PNG + Alpha output template not found"); }
+            outputModule = renderItem.outputModule(1);
+            outputModule.applyTemplate(template);
+            outputModule = renderItem.outputModule(1);
+            outputModule.file = png;
+            queue.render();
+            var renderedFrames = png.parent.getFiles(png.name + "*");
+            var renderedFile = png.exists ? png : null;
+            for (var frameIndex = 0; frameIndex < renderedFrames.length; frameIndex++) {
+                if (renderedFrames[frameIndex] instanceof File && renderedFrames[frameIndex].fsName !== png.fsName) {
+                    renderedFile = renderedFrames[frameIndex];
+                    break;
+                }
+            }
+            if (!renderedFile || !renderedFile.exists) { throw new Error("Rendered PNG frame was not found"); }
+            if (renderedFile.fsName !== png.fsName && !renderedFile.rename(png.name)) {
+                throw new Error("Rendered PNG could not be renamed");
+            }
+            return "Captured " + comp.name;
+        } catch (error) {
+            return "Error: " + error.message;
+        } finally {
+            if (renderItem) { try { renderItem.remove(); } catch (removeQueueError) {} }
+            if (renderComp) { try { renderComp.remove(); } catch (removeCompError) {} }
+            for (var restoreIndex = 1; restoreIndex <= queueStates.length; restoreIndex++) {
+                try { queue.item(restoreIndex).render = queueStates[restoreIndex - 1]; }
+                catch (restoreError) {}
+            }
+        }
     };
     api.chooseLibrary = function() {
         var chosen = Folder.selectDialog("FFXライブラリフォルダを選択", library());
@@ -258,7 +436,7 @@
             queue.render();
 
             var renderedFrames = png.parent.getFiles(png.name + "*");
-            var renderedFile = null;
+            var renderedFile = png.exists ? png : null;
             for (var frameIndex = 0; frameIndex < renderedFrames.length; frameIndex++) {
                 if (renderedFrames[frameIndex] instanceof File && renderedFrames[frameIndex].fsName !== png.fsName) {
                     renderedFile = renderedFrames[frameIndex];
@@ -266,7 +444,9 @@
                 }
             }
             if (!renderedFile || !renderedFile.exists) { throw new Error("Rendered PNG frame was not found"); }
-            if (!renderedFile.rename(png.name)) { throw new Error("Rendered PNG could not be renamed"); }
+            if (renderedFile.fsName !== png.fsName && !renderedFile.rename(png.name)) {
+                throw new Error("Rendered PNG could not be renamed");
+            }
             return useLayerIsolation ? "Captured selected layer" : "Captured composition";
         } catch (error) {
             return "Error: " + error.message;
