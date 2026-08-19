@@ -30,63 +30,85 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 
 ## Scripts
 
-| 名前 | 概要 | エントリーポイント |
-| --- | --- | --- |
-| Add Marker | 選択レイヤー、未選択時はコンポへマーカーを追加 | `scripts/markers/add-marker/Add_Marker.jsx` |
-| Delete Marker At Playhead | 再生位置のレイヤー／コンポマーカーを削除 | `scripts/markers/delete-marker-at-playhead/Delete_Marker_At_Playhead.jsx` |
-| Change Mask Mode | 選択レイヤーのマスクモードを一括変更 | `scripts/masks/change-mask-mode/ChangeMaskMode.jsx` |
-| Export Markers | コンポジション／レイヤーマーカーを書き出し | `scripts/markers/export-markers/ExportMarkers.jsx` |
-| Match Nested Comp Duration | ネストコンポジションの尺を親または選択レイヤーへ合わせる | `scripts/composition/match-nested-comp-duration/MatchNestedCompDuration.jsx` |
-| Duplicate Comp Hierarchy | 選択中または現在のコンポと子コンポを参照関係ごと複製してフォルダへ格納 | `scripts/composition/duplicate-comp-hierarchy/Duplicate_Comp_Hierarchy.jsx` |
-| Create Comp Size White Solid | コンポサイズ・コンポ尺の白平面を作成 | `scripts/composition/create-comp-size-white-solid/Create_Comp_Size_White_Solid.jsx` |
-| Nulls From Selected Shape Paths | 選択したシェイプパスから Null を作成 | `scripts/shape/nulls-from-selected-shape-paths/Nulls_From_Selected_Shape_Paths.jsx` |
-| Swap Fill / Stroke Colors | シェイプ／テキストの塗りと線を表示状態ごと交換 | `scripts/shape/swap-fill-stroke-colors/Swap_Fill_Stroke_Colors.jsx` |
-| Select Shape Layers | 選択範囲、未選択時はコンポ全体からシェイプレイヤーだけを選択 | `scripts/shape/select-shape-layers/Select_Shape_Layers.jsx` |
-| Select Text Layers | 選択範囲、未選択時はコンポ全体からテキストレイヤーだけを選択 | `scripts/text/select-text-layers/Select_Text_Layers.jsx` |
-| Create Shape Style Controller | 選択したシェイプレイヤーの塗りと線を一括操作する Null を作成 | `scripts/shape/create-shape-style-controller/Create_Shape_Style_Controller.jsx` |
-| Toggle Fill | 選択したシェイプ／テキストの塗りを切り替え | `scripts/shape/add-fill-stroke/Toggle_Fill.jsx` |
-| Toggle Stroke | 選択したシェイプ／テキストの線を切り替え | `scripts/shape/add-fill-stroke/Toggle_Stroke.jsx` |
-| Flip Horizontal | 選択レイヤーを左右反転 | `scripts/transform/flip-tools/Flip_Horizontal.jsx` |
-| Flip Vertical | 選択レイヤーを上下反転 | `scripts/transform/flip-tools/Flip_Vertical.jsx` |
-| Unlink Scale Dimensions | Scale X／Y／Zスライダーを追加して独立制御 | `scripts/transform/flip-tools/Unlink_Scale_Dimensions.jsx` |
-| Link Scale Dimensions | スライダーの結果をScaleへベイクしてコントロールを削除 | `scripts/transform/flip-tools/Link_Scale_Dimensions.jsx` |
-| Set In Point | 選択レイヤーのイン点を再生位置へ設定 | `scripts/timeline/trim-layer/Set_In_Point.jsx` |
-| Set Out Point | 選択レイヤーのアウト点を再生位置へ設定 | `scripts/timeline/trim-layer/Set_Out_Point.jsx` |
-| Trim To First Selected | 選択配列の先頭レイヤーへ他のイン点・アウト点を揃える | `scripts/timeline/trim-to-first-selected/Trim_To_First_Selected.jsx` |
-| Trim To Last Selected | 選択配列の末尾レイヤーへ他のイン点・アウト点を揃える | `scripts/timeline/trim-to-last-selected/Trim_To_Last_Selected.jsx` |
-| Purge All Caches | RAM・ディスク・Undo・Snapshotキャッシュを一括削除 | `scripts/system/purge-all-caches/Purge_All_Caches.jsx` |
-| Open Project Parent Folder | 保存中のプロジェクトフォルダの一つ上をFinder／Explorerで開く | `scripts/project/open-project-parent-folder/Open_Project_Parent_Folder.jsx` |
-| Add Slider Control | 選択した数値プロパティへ現在値・キーフレーム付きのスライダー制御を追加 | `scripts/property/add-slider-control/Add_Slider_Control.jsx` |
+### Shape / Text
+
+| ツール | 概要 |
+| --- | --- |
+| <img src="scripts/shape/select-shape-layers/Select_Shape_Layers.svg" width="24" height="24" alt=""> **Select Shape Layers** | 選択範囲、未選択時はコンポ全体からシェイプレイヤーだけを選択 |
+| <img src="scripts/text/select-text-layers/Select_Text_Layers.svg" width="24" height="24" alt=""> **Select Text Layers** | 選択範囲、未選択時はコンポ全体からテキストレイヤーだけを選択 |
+| <img src="scripts/shape/create-shape-style-controller/Create_Shape_Style_Controller.svg" width="24" height="24" alt=""> **Create Shape Style Controller** | 選択したシェイプレイヤーの塗りと線を一括操作するNullを作成 |
+| <img src="scripts/shape/add-fill-stroke/Toggle_Fill.svg" width="24" height="24" alt=""> **Toggle Fill** | 選択したシェイプ／テキストの塗りを切り替え |
+| <img src="scripts/shape/add-fill-stroke/Toggle_Stroke.svg" width="24" height="24" alt=""> **Toggle Stroke** | 選択したシェイプ／テキストの線を切り替え |
+| <img src="scripts/shape/swap-fill-stroke-colors/Swap_Fill_Stroke_Colors.svg" width="24" height="24" alt=""> **Swap Fill / Stroke Colors** | シェイプ／テキストの塗りと線を表示状態ごと交換 |
+| <img src="scripts/shape/nulls-from-selected-shape-paths/Nulls_From_Selected_Shape_Paths.svg" width="24" height="24" alt=""> **Nulls From Selected Shape Paths** | 選択したシェイプパスからNullを作成 |
+
+### Transform / Property
+
+| ツール | 概要 |
+| --- | --- |
+| <img src="scripts/transform/flip-tools/Flip_Horizontal.svg" width="24" height="24" alt=""> **Flip Horizontal** | 選択レイヤーを左右反転 |
+| <img src="scripts/transform/flip-tools/Flip_Vertical.svg" width="24" height="24" alt=""> **Flip Vertical** | 選択レイヤーを上下反転 |
+| <img src="scripts/transform/flip-tools/Unlink_Scale_Dimensions.svg" width="24" height="24" alt=""> **Unlink Scale Dimensions** | Scale X／Y／Zスライダーを追加して独立制御 |
+| <img src="scripts/transform/flip-tools/Link_Scale_Dimensions.svg" width="24" height="24" alt=""> **Link Scale Dimensions** | スライダーの結果をScaleへベイクしてコントロールを削除 |
+| <img src="scripts/property/add-slider-control/Add_Slider_Control.svg" width="24" height="24" alt=""> **Add Slider Control** | 選択した数値プロパティへ現在値・キーフレーム付きのスライダー制御を追加 |
+
+### Timeline / Markers
+
+| ツール | 概要 |
+| --- | --- |
+| <img src="scripts/timeline/trim-layer/Set_In_Point.svg" width="24" height="24" alt=""> **Set In Point** | 選択レイヤーのイン点を再生位置へ設定 |
+| <img src="scripts/timeline/trim-layer/Set_Out_Point.svg" width="24" height="24" alt=""> **Set Out Point** | 選択レイヤーのアウト点を再生位置へ設定 |
+| <img src="scripts/timeline/trim-to-first-selected/Trim_To_First_Selected.svg" width="24" height="24" alt=""> **Trim To First Selected** | 選択配列の先頭レイヤーへ他のイン点・アウト点を揃える |
+| <img src="scripts/timeline/trim-to-last-selected/Trim_To_Last_Selected.svg" width="24" height="24" alt=""> **Trim To Last Selected** | 選択配列の末尾レイヤーへ他のイン点・アウト点を揃える |
+| <img src="scripts/markers/add-marker/Add_Marker.svg" width="24" height="24" alt=""> **Add Marker** | 選択レイヤー、未選択時はコンポへマーカーを追加 |
+| <img src="scripts/markers/delete-marker-at-playhead/Delete_Marker_At_Playhead.svg" width="24" height="24" alt=""> **Delete Marker At Playhead** | 再生位置のレイヤー／コンポマーカーを削除 |
+| **Export Markers** | コンポジション／レイヤーマーカーを書き出し |
+
+### Composition / Project
+
+| ツール | 概要 |
+| --- | --- |
+| <img src="scripts/composition/create-comp-size-white-solid/Create_Comp_Size_White_Solid.svg" width="24" height="24" alt=""> **Create Comp Size White Solid** | コンポサイズ・コンポ尺の白平面を作成 |
+| <img src="scripts/composition/duplicate-comp-hierarchy/Duplicate_Comp_Hierarchy.svg" width="24" height="24" alt=""> **Duplicate Comp Hierarchy** | 選択中または現在のコンポと子コンポを参照関係ごと複製してフォルダへ格納 |
+| **Match Nested Comp Duration** | ネストコンポジションの尺を親または選択レイヤーへ合わせる |
+| <img src="scripts/project/open-project-parent-folder/Open_Project_Parent_Folder.svg" width="24" height="24" alt=""> **Open Project Parent Folder** | 保存中のプロジェクトフォルダの一つ上をFinder／Explorerで開く |
+
+### Masks / System
+
+| ツール | 概要 |
+| --- | --- |
+| **Change Mask Mode** | 選択レイヤーのマスクモードを一括変更 |
+| <img src="scripts/system/purge-all-caches/Purge_All_Caches.svg" width="24" height="24" alt=""> **Purge All Caches** | RAM・ディスク・Undo・Snapshotキャッシュを一括削除 |
 
 ## Panels
 
-| 名前 | 概要 | エントリーポイント |
-| --- | --- | --- |
-| Align Layers | 2D／3Dレイヤーを選択範囲またはコンポ基準で整列・均等配置 | `panels/align-layers/AlignLayers.jsx` |
-| Alpha To Mask | オートトレースしたマスクをレイヤーへ分割 | `panels/alpha-to-mask/AlphaToMask.jsx` |
-| Change Footage Framerate | フッテージとコンポジションのフレームレートを変更 | `panels/change-footage-framerate/changefootageframerate.jsx` |
-| Comp Bookmarks | コンポジションをブックマーク管理 | `panels/comp-bookmarks/CompBookmarks.jsx` |
-| Dependency Graph | プロジェクトの依存関係をHTMLグラフとして表示 | `panels/dependency-graph/DependencyGraph.jsx` |
-| Flip Tools | レイヤーの反転とスケール連携を操作 | `panels/flip-tools/FlipTools.jsx` |
-| Marker Editor | 選択レイヤーのマーカー色とコメントを編集 | `panels/marker-editor/MarkerEditor.jsx` |
-| Purge All Caches | キャッシュを一括または種類別に削除 | `panels/purge-all-caches/PurgeAllCaches.jsx` |
-| Scale KF Paste |相対的な動きを保ってスケールキーフレームをコピー＆ペースト | `panels/scale-kf-paste/ScaleKF_Paste.jsx` |
-| Shape Fill Stroke | Illustrator風UIでシェイプの塗りと線を操作 | `panels/shape-fill-stroke/ShapeFillStroke.jsx` |
+| パネル | 概要 |
+| --- | --- |
+| <img src="panels/align-layers/AlignLayers.svg" width="24" height="24" alt=""> **Align Layers** | 2D／3Dレイヤーを選択範囲またはコンポ基準で整列・均等配置 |
+| <img src="panels/alpha-to-mask/AlphaToMask.svg" width="24" height="24" alt=""> **Alpha To Mask** | オートトレースしたマスクをレイヤーへ分割 |
+| **Change Footage Framerate** | フッテージとコンポジションのフレームレートを変更 |
+| **Comp Bookmarks** | コンポジションをブックマーク管理 |
+| **Dependency Graph** | プロジェクトの依存関係をHTMLグラフとして表示 |
+| **Flip Tools** | レイヤーの反転とスケール連携を操作 |
+| **Marker Editor** | 選択レイヤーのマーカー色とコメントを編集 |
+| <img src="panels/purge-all-caches/PurgeAllCaches.svg" width="24" height="24" alt=""> **Purge All Caches** | キャッシュを一括または種類別に削除 |
+| **Scale KF Paste** | 相対的な動きを保ってスケールキーフレームをコピー＆ペースト |
+| **Shape Fill Stroke** | Illustrator風UIでシェイプの塗りと線を操作 |
 
 ## CEP Extensions
 
-| 名前 | 概要 | エントリーポイント |
-| --- | --- | --- |
-| Animation Preset Viewer / Save | HTML製のFFXサムネイルビューアと保存パネル | `extensions/animation-preset-library/CSXS/manifest.xml` |
+| パネル | 概要 |
+| --- | --- |
+| **Animation Preset Viewer / Save** | HTML製のFFXサムネイルビューアと保存パネル |
 
 ## Presets
 
-| 名前 | 概要 | ファイル |
-| --- | --- | --- |
-| Circle Repeater | 中央固定または左上起点で、円を四角いグリッド状に反復 | `presets/circle-repeater/Build_Circle_Repeater.jsx` |
-| Trimmed Circle | Start／End／Offsetでパスのトリミングを操作する正円を生成 | `presets/trimmed-circle/Create_Trimmed_Circle.jsx` |
-| Simple Text | 中央へシンプルなテキストレイヤーを生成 | `presets/simple-text/Create_Simple_Text.jsx` |
-| Simple Rectangle | Width／Height／Roundness付きの四角形を生成 | `presets/simple-rectangle/Create_Simple_Rectangle.jsx` |
+| プリセット | 概要 |
+| --- | --- |
+| <img src="presets/circle-repeater/Build_Circle_Repeater.svg" width="24" height="24" alt=""> **Circle Repeater** | 中央固定または左上起点で、円を四角いグリッド状に反復 |
+| <img src="presets/trimmed-circle/Create_Trimmed_Circle.svg" width="24" height="24" alt=""> **Trimmed Circle** | Start／End／Offsetでパスのトリミングを操作する正円を生成 |
+| <img src="presets/simple-text/Create_Simple_Text.svg" width="24" height="24" alt=""> **Simple Text** | 中央へシンプルなテキストレイヤーを生成 |
+| <img src="presets/simple-rectangle/Create_Simple_Rectangle.svg" width="24" height="24" alt=""> **Simple Rectangle** | Width／Height／Roundness付きの四角形を生成 |
 
 ## インストール
 
