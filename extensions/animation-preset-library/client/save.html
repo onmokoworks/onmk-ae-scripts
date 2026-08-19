@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Preset Save</title></head>
+<body data-panel="save">
+  <header class="panel-header">
+    <span class="panel-title">Preset Save</span>
+    <button id="menuButton" class="header-button hamburger" title="Panel menu"><i></i><i></i><i></i></button>
+  </header>
+  <aside id="settingsMenu" class="settings-menu">
+    <div class="menu-label">PRESET LIBRARY</div>
+    <div id="folderName" class="menu-path">No folder selected</div>
+    <div class="menu-actions"><button id="chooseFolder">Choose Folder…</button><button id="revealFolder">Reveal</button></div>
+  </aside>
+  <main class="save-content">
+    <button id="savePreset" class="save-dropzone">
+      <span class="save-icon">↓</span>
+      <strong>Save animation preset</strong>
+      <small>Selected properties are used as-is. With one layer selected, all effects, keyframes, and expressions are collected automatically.</small>
+    </button>
+  </main>
+  <footer class="actions"><span id="status" class="status">Ready</span></footer>
+  <script src="cep.js"></script><script src="save.js"></script>
+</body>
+</html>
