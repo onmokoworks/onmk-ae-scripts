@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary and generated files
+*.tmp
+*.log
+dist/
+build/
+
+# Adobe After Effects
+Adobe After Effects Auto-Save/
+*.aepx.tmp
+
