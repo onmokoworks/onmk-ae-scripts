@@ -54,7 +54,7 @@
                 };
                 thumb.appendChild(image);
             } else {
-                thumb.textContent = "FFX";
+                thumb.textContent = (item.kind || "ffx").toUpperCase();
             }
 
             var label = document.createElement("div");
@@ -85,7 +85,7 @@
             if (silent && result === lastPayload) { return; }
             lastPayload = result;
             files = cep.parse(result, []);
-            if (!keepStatus) { status.textContent = files.length + " presets"; }
+            if (!keepStatus) { status.textContent = files.length + " library items"; }
             render();
         });
     }
@@ -119,7 +119,7 @@
             if (files[i].path === selectedPath) { selectedItem = files[i]; break; }
         }
         var label = selectedItem ? selectedItem.name : "this preset";
-        if (!window.confirm("Delete " + label + "?\n\nThe FFX and its PNG thumbnail will be removed.")) { return; }
+        if (!window.confirm("Delete " + label + "?\n\nThe library item and its PNG thumbnail will be removed.")) { return; }
         call("deletePreset", [selectedPath]).then(function (result) {
             selectedPath = "";
             status.textContent = result || "Deleted";

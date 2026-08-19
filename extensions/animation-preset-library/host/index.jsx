@@ -25,12 +25,14 @@
         var entries = folder.getFiles();
         for (var i = 0; i < entries.length; i++) {
             if (entries[i] instanceof Folder) { collect(entries[i], root, output); }
-            else if (entries[i] instanceof File && /\.ffx$/i.test(entries[i].name)) {
-                var relative = entries[i].fsName.substring(root.fsName.length).replace(/^[\\\/]+/, "").replace(/\.ffx$/i, "").replace(/\\/g, "/");
-                var png = new File(entries[i].parent.fsName + "/" + entries[i].name.replace(/\.ffx$/i, ".png"));
+            else if (entries[i] instanceof File && /\.(ffx|aep)$/i.test(entries[i].name)) {
+                var kind = /\.aep$/i.test(entries[i].name) ? "aep" : "ffx";
+                var relative = entries[i].fsName.substring(root.fsName.length).replace(/^[\\\/]+/, "").replace(/\.(ffx|aep)$/i, "").replace(/\\/g, "/");
+                var png = new File(entries[i].parent.fsName + "/" + entries[i].name.replace(/\.(ffx|aep)$/i, ".png"));
                 output.push({
                     name: relative,
                     path: entries[i].fsName,
+                    kind: kind,
                     thumbnail: png.exists ? fileUrl(png) : "",
                     stamp: png.exists ? png.modified.getTime() : 0
                 });
@@ -89,11 +91,11 @@
         var preset = new File(path);
         var libraryPath = folder.fsName.replace(/\\/g, "/");
         var presetPath = preset.fsName.replace(/\\/g, "/");
-        if (presetPath.indexOf(libraryPath + "/") !== 0 || !/\.ffx$/i.test(preset.name)) {
+        if (presetPath.indexOf(libraryPath + "/") !== 0 || !/\.(ffx|aep)$/i.test(preset.name)) {
             return "Refused: preset is outside the library";
         }
         if (!preset.exists) { return "Preset not found"; }
-        var thumbnail = new File(preset.parent.fsName + "/" + preset.name.replace(/\.ffx$/i, ".png"));
+        var thumbnail = new File(preset.parent.fsName + "/" + preset.name.replace(/\.(ffx|aep)$/i, ".png"));
         var presetName = preset.displayName;
         if (!preset.remove()) { return "Could not delete " + presetName; }
         if (thumbnail.exists) { thumbnail.remove(); }
@@ -105,25 +107,57 @@
         items.sort(function(a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
         var parts = [];
         for (var i = 0; i < items.length; i++) {
-            parts.push('{"name":"' + jsonEscape(items[i].name) + '","path":"' + jsonEscape(items[i].path) + '","thumbnail":"' + jsonEscape(items[i].thumbnail) + '","stamp":' + items[i].stamp + '}');
+            parts.push('{"name":"' + jsonEscape(items[i].name) + '","path":"' + jsonEscape(items[i].path) + '","kind":"' + items[i].kind + '","thumbnail":"' + jsonEscape(items[i].thumbnail) + '","stamp":' + items[i].stamp + '}');
         }
         return "[" + parts.join(",") + "]";
     };
     api.applyPreset = function(path) {
-        var comp = app.project && app.project.activeItem;
-        if (!comp || !(comp instanceof CompItem) || comp.selectedLayers.length === 0) { return "Select target layers"; }
         var file = new File(path);
         if (!file.exists) { return "Preset not found"; }
+        if (/\.aep$/i.test(file.name)) {
+            app.beginUndoGroup("Import AEP Template");
+            try {
+                app.project.importFile(new ImportOptions(file));
+                return "Imported " + file.displayName;
+            } catch (importError) {
+                return "Error: " + importError.message;
+            } finally {
+                app.endUndoGroup();
+            }
+        }
+
+        var comp = app.project && app.project.activeItem;
+        if (!comp || !(comp instanceof CompItem)) { return "Open a composition"; }
+        var target = comp.selectedLayers.length > 0 ? comp.selectedLayers[0] : null;
+        var createdSolid = null;
         app.beginUndoGroup("Apply Animation Preset");
-        try { comp.selectedLayers[0].applyPreset(file); return "Applied " + file.displayName; }
-        catch (error) { return "Error: " + error.message; }
+        try {
+            if (!target) {
+                createdSolid = comp.layers.addSolid(
+                    [1, 1, 1],
+                    file.displayName.replace(/\.ffx$/i, ""),
+                    comp.width,
+                    comp.height,
+                    comp.pixelAspect,
+                    comp.duration
+                );
+                target = createdSolid;
+            }
+            target.applyPreset(file);
+            return createdSolid ?
+                "Applied " + file.displayName + " to a new solid" :
+                "Applied " + file.displayName;
+        } catch (error) {
+            if (createdSolid) { try { createdSolid.remove(); } catch (removeError) {} }
+            return "Error: " + error.message;
+        }
         finally { app.endUndoGroup(); }
     };
     api.captureThumbnail = function(path) {
         var comp = app.project && app.project.activeItem;
         if (!comp || !(comp instanceof CompItem)) { return "Open a composition"; }
         var preset = new File(path);
-        var png = new File(preset.parent.fsName + "/" + preset.name.replace(/\.ffx$/i, ".png"));
+        var png = new File(preset.parent.fsName + "/" + preset.name.replace(/\.(ffx|aep)$/i, ".png"));
         var selectedLayers = comp.selectedLayers;
         var useLayerIsolation = selectedLayers && selectedLayers.length > 0;
         var selectedIndexes = {};
@@ -241,6 +275,27 @@
                     catch (selectionError) {}
                 }
             }
+        }
+    };
+    api.saveProjectCopy = function() {
+        var folder = library();
+        if (!folder) { return "Choose a library folder"; }
+        if (!app.project || !app.project.file) { return "Save the current AEP first"; }
+
+        try {
+            app.project.save();
+            var source = app.project.file;
+            var suggested = new File(folder.fsName + "/" + source.name);
+            var destination = suggested.saveDlg("Save AEP template", "After Effects Project:*.aep");
+            if (!destination) { return "Canceled"; }
+            if (!/\.aep$/i.test(destination.name)) {
+                destination = new File(destination.fsName + ".aep");
+            }
+            if (destination.fsName === source.fsName) { return "Choose a different file name"; }
+            if (!source.copy(destination.fsName)) { return "Could not copy the AEP"; }
+            return "Saved " + destination.displayName;
+        } catch (error) {
+            return "Error: " + error.message;
         }
     };
 }());

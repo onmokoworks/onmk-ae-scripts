@@ -99,7 +99,7 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 
 | パネル | 概要 |
 | --- | --- |
-| **Animation Preset Viewer / Save** | HTML製のFFXサムネイルビューアと保存パネル |
+| **Animation Preset Viewer / Save** | FFXとAEPテンプレートをサムネイル付きで保存・閲覧・適用するHTMLパネル |
 
 ## Presets
 

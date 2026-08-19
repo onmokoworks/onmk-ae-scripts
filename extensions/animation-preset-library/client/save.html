@@ -11,12 +11,13 @@
     <div id="folderName" class="menu-path">No folder selected</div>
     <div class="menu-actions"><button id="chooseFolder">Choose Folder…</button><button id="revealFolder">Reveal</button></div>
   </aside>
-  <main class="save-content">
-    <button id="savePreset" class="save-dropzone">
+  <main class="save-content" style="display:flex;flex-direction:column;gap:7px">
+    <button id="savePreset" class="save-dropzone" style="height:auto;flex:1">
       <span class="save-icon">↓</span>
       <strong>Save animation preset</strong>
       <small>Selected properties are used as-is. With one layer selected, all effects, keyframes, and expressions are collected automatically.</small>
     </button>
+    <button id="saveProject" class="secondary">Save current AEP copy…</button>
   </main>
   <footer class="actions"><span id="status" class="status">Ready</span></footer>
   <script src="cep.js"></script><script src="save.js"></script>
