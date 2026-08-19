@@ -20,6 +20,7 @@ Adobe After Effects 用の ExtendScript（JSX）をまとめるモノレポで�
 - `masks/` — マスク操作
 - `composition/` — コンポジション構造と尺の操作
 - `timeline/` — イン点、アウト点などタイムライン編集
+- `system/` — キャッシュなどAfter Effects全体の操作
 
 KBar用SVGがある場合は、対応するJSXと同じベース名にします（例: `Tool.jsx` / `Tool.svg`）。
 
@@ -44,17 +45,20 @@ KBar用SVGがある場合は、対応するJSXと同じベース名にします�
 | Link Scale Dimensions | スライダーの結果をScaleへベイクしてコントロールを削除 | `scripts/transform/flip-tools/Link_Scale_Dimensions.jsx` |
 | Set In Point | 選択レイヤーのイン点を再生位置へ設定 | `scripts/timeline/trim-layer/Set_In_Point.jsx` |
 | Set Out Point | 選択レイヤーのアウト点を再生位置へ設定 | `scripts/timeline/trim-layer/Set_Out_Point.jsx` |
+| Purge All Caches | RAM・ディスク・Undo・Snapshotキャッシュを一括削除 | `scripts/system/purge-all-caches/Purge_All_Caches.jsx` |
 
 ## Panels
 
 | 名前 | 概要 | エントリーポイント |
 | --- | --- | --- |
+| Align Layers | 2D／3Dレイヤーを選択範囲またはコンポ基準で整列・均等配置 | `panels/align-layers/AlignLayers.jsx` |
 | Alpha To Mask | オートトレースしたマスクをレイヤーへ分割 | `panels/alpha-to-mask/AlphaToMask.jsx` |
 | Change Footage Framerate | フッテージとコンポジションのフレームレートを変更 | `panels/change-footage-framerate/changefootageframerate.jsx` |
 | Comp Bookmarks | コンポジションをブックマーク管理 | `panels/comp-bookmarks/CompBookmarks.jsx` |
 | Dependency Graph | プロジェクトの依存関係をHTMLグラフとして表示 | `panels/dependency-graph/DependencyGraph.jsx` |
 | Flip Tools | レイヤーの反転とスケール連携を操作 | `panels/flip-tools/FlipTools.jsx` |
 | Marker Editor | 選択レイヤーのマーカー色とコメントを編集 | `panels/marker-editor/MarkerEditor.jsx` |
+| Purge All Caches | キャッシュを一括または種類別に削除 | `panels/purge-all-caches/PurgeAllCaches.jsx` |
 | Scale KF Paste |相対的な動きを保ってスケールキーフレームをコピー＆ペースト | `panels/scale-kf-paste/ScaleKF_Paste.jsx` |
 | Shape Fill Stroke | Illustrator風UIでシェイプの塗りと線を操作 | `panels/shape-fill-stroke/ShapeFillStroke.jsx` |
 
