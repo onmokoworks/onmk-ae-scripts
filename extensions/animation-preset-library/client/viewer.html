@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Preset Viewer</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="theme.css"><title>Preset Viewer</title></head>
 <body data-panel="viewer">
   <header class="panel-header">
     <span class="panel-title">Preset Viewer</span>
@@ -11,6 +11,9 @@
     <div class="menu-label">PRESET LIBRARY</div>
     <div id="folderName" class="menu-path">No folder selected</div>
     <div class="menu-actions"><button id="chooseFolder">Choose Folder…</button><button id="revealFolder">Reveal</button></div>
+    <div class="menu-label theme-row">APPEARANCE</div>
+    <button id="themeButton" class="theme-button"><span id="themeSwatch" class="theme-swatch"></span>Theme Color…</button>
+    <input id="themeColor" class="theme-picker" type="color" value="#9b63d5">
   </aside>
   <div class="search-wrap"><input id="search" type="search" placeholder="Search presets…"></div>
   <main id="grid" class="preset-grid"></main>

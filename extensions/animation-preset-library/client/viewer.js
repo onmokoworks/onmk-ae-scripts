@@ -46,6 +46,9 @@
 
             var thumb = document.createElement("div");
             thumb.className = "thumb";
+            var badge = document.createElement("span");
+            badge.className = "type-badge";
+            badge.textContent = (item.kind || "ffx").toUpperCase();
             if (item.thumbnail) {
                 var image = document.createElement("img");
                 image.src = item.thumbnail + "?t=" + item.stamp;
@@ -61,6 +64,7 @@
             label.className = "preset-name";
             label.textContent = item.name;
             card.appendChild(thumb);
+            card.appendChild(badge);
             card.appendChild(label);
 
             card.onclick = function () {

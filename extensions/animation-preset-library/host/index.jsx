@@ -3,6 +3,7 @@
     var api = $._onmkPresets;
     var SECTION = "onmk Animation Preset Library";
     var KEY = "libraryFolder";
+    var THEME_KEY = "themeColor";
     var FOLDER_FFX = "Animation Presets";
     var FOLDER_COMPS = "Composition Templates";
     var FOLDER_PROJECTS = "Project Templates";
@@ -43,9 +44,11 @@
             else if (entries[i] instanceof File && /\.(ffx|aep)$/i.test(entries[i].name)) {
                 var kind = /\.aep$/i.test(entries[i].name) ? "aep" : "ffx";
                 var relative = entries[i].fsName.substring(root.fsName.length).replace(/^[\\\/]+/, "").replace(/\.(ffx|aep)$/i, "").replace(/\\/g, "/");
+                if (relative.indexOf(FOLDER_COMPS + "/") === 0) { kind = "comp"; }
+                var displayName = relative.replace(new RegExp("^(" + FOLDER_FFX + "|" + FOLDER_COMPS + "|" + FOLDER_PROJECTS + ")/"), "");
                 var png = new File(entries[i].parent.fsName + "/" + entries[i].name.replace(/\.(ffx|aep)$/i, ".png"));
                 output.push({
-                    name: relative,
+                    name: displayName,
                     path: entries[i].fsName,
                     kind: kind,
                     thumbnail: png.exists ? fileUrl(png) : "",
@@ -93,6 +96,21 @@
         return selectedCount;
     }
     api.getLibrary = function() { var folder = library(); return folder ? folder.fsName : ""; };
+    api.getTheme = function() {
+        try {
+            if (app.settings.haveSetting(SECTION, THEME_KEY)) {
+                var color = app.settings.getSetting(SECTION, THEME_KEY);
+                if (/^#[0-9a-f]{6}$/i.test(color)) { return color; }
+            }
+        } catch (error) {}
+        return "#9b63d5";
+    };
+    api.setTheme = function(color) {
+        if (/^#[0-9a-f]{6}$/i.test(color)) {
+            app.settings.saveSetting(SECTION, THEME_KEY, color);
+        }
+        return api.getTheme();
+    };
     api.chooseLibrary = function() {
         var chosen = Folder.selectDialog("FFXライブラリフォルダを選択", library());
         if (!chosen) { return api.getLibrary(); }
