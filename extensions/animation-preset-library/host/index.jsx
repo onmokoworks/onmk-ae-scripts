@@ -298,4 +298,67 @@
             return "Error: " + error.message;
         }
     };
+    api.saveActiveCompTemplate = function() {
+        var folder = library();
+        if (!folder) { return "Choose a library folder"; }
+        var sourceProject = app.project;
+        var sourceComp = sourceProject && sourceProject.activeItem;
+        if (!sourceProject || !sourceProject.file) { return "Save the current AEP first"; }
+        if (!sourceComp || !(sourceComp instanceof CompItem)) { return "Open the composition to save"; }
+
+        var sourceFile = new File(sourceProject.file.fsName);
+        var sourceComment = sourceComp.comment;
+        var marker = "__ONMK_COMP_TEMPLATE_" + new Date().getTime() + "__";
+        var suggested = new File(folder.fsName + "/" + sourceComp.name.replace(/[\\\/:*?\"<>|]/g, "_") + ".aep");
+        var destination = suggested.saveDlg("Save composition template", "After Effects Project:*.aep");
+        if (!destination) { return "Canceled"; }
+        if (!/\.aep$/i.test(destination.name)) {
+            destination = new File(destination.fsName + ".aep");
+        }
+        if (destination.fsName === sourceFile.fsName) { return "Choose a different file name"; }
+
+        function findMarkedComp() {
+            for (var i = 1; i <= app.project.numItems; i++) {
+                var item = app.project.item(i);
+                if (item instanceof CompItem && item.comment === marker) { return item; }
+            }
+            return null;
+        }
+
+        function restoreSourceProject() {
+            var currentFile = app.project && app.project.file;
+            if (!currentFile || currentFile.fsName !== sourceFile.fsName) {
+                if (app.project) { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); }
+                app.open(sourceFile);
+            }
+            var originalComp = findMarkedComp();
+            if (originalComp) {
+                originalComp.comment = sourceComment;
+                app.project.save();
+                originalComp.openInViewer();
+            }
+        }
+
+        try {
+            sourceComp.comment = marker;
+            sourceProject.save();
+            sourceProject.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+            if (!app.newProject()) { throw new Error("Could not create the template project"); }
+
+            app.project.importFile(new ImportOptions(sourceFile));
+            var templateComp = findMarkedComp();
+            if (!templateComp) { throw new Error("Could not find the source composition"); }
+            app.project.reduceProject([templateComp]);
+            templateComp.comment = sourceComment;
+            app.project.save(destination);
+            restoreSourceProject();
+            return "Saved comp template " + destination.displayName;
+        } catch (error) {
+            try { restoreSourceProject(); }
+            catch (restoreError) {
+                return "Error: " + error.message + " / Reopen the source AEP: " + sourceFile.fsName;
+            }
+            return "Error: " + error.message;
+        }
+    };
 }());
