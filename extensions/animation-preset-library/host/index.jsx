@@ -89,8 +89,63 @@
     }
     function fileUrl(file) {
         var path = file.fsName.replace(/\\/g, "/");
-        if (path.charAt(0) !== "/") { path = "/" + path; }
-        return "file://" + encodeURI(path);
+        var parts, encoded = [], i;
+        if (path.indexOf("//") === 0) {
+            parts = path.substring(2).split("/");
+            for (i = 0; i < parts.length; i++) { encoded.push(encodeURIComponent(parts[i])); }
+            return "file://" + encoded.join("/");
+        }
+        if (/^[A-Za-z]:\//.test(path)) {
+            parts = path.substring(3).split("/");
+            for (i = 0; i < parts.length; i++) { encoded.push(encodeURIComponent(parts[i])); }
+            return "file:///" + path.substring(0, 2) + "/" + encoded.join("/");
+        }
+        parts = path.replace(/^\/+/, "").split("/");
+        for (i = 0; i < parts.length; i++) { encoded.push(encodeURIComponent(parts[i])); }
+        return "file:///" + encoded.join("/");
+    }
+    function findPngTemplate(renderItem) {
+        var outputModule = renderItem.outputModule(1);
+        var templates = outputModule.templates;
+        var pngFallback = null;
+        for (var i = 0; i < templates.length; i++) {
+            try {
+                outputModule.applyTemplate(templates[i]);
+                outputModule = renderItem.outputModule(1);
+                var settings = outputModule.getSettings(GetSettingsFormat.STRING);
+                if (/PNG/i.test(settings.Format)) {
+                    if (!pngFallback) { pngFallback = templates[i]; }
+                    if (/(Alpha|アルファ|RGBA)/i.test(settings.Channels || "")) { return templates[i]; }
+                }
+            } catch (error) {}
+        }
+        return pngFallback;
+    }
+    function temporaryThumbnail(prefix) {
+        var folder = new Folder(Folder.temp.fsName + "/onmk-animation-presets");
+        if (!folder.exists && !folder.create()) { throw new Error("Could not create thumbnail temp folder"); }
+        return new File(folder.fsName + "/" + prefix + "_" + new Date().getTime() + ".png");
+    }
+    function removeOutputFamily(file) {
+        var siblings = file.parent.getFiles(file.name + "*");
+        for (var i = 0; i < siblings.length; i++) {
+            if (siblings[i] instanceof File) { try { siblings[i].remove(); } catch (error) {} }
+        }
+    }
+    function renderedFrame(file) {
+        if (file.exists) { return file; }
+        var candidates = file.parent.getFiles(file.name + "*");
+        for (var i = 0; i < candidates.length; i++) {
+            if (candidates[i] instanceof File && candidates[i].exists) { return candidates[i]; }
+        }
+        return null;
+    }
+    function publishThumbnail(rendered, destination) {
+        if (!rendered || !rendered.exists) { throw new Error("Rendered PNG frame was not found"); }
+        removeOutputFamily(destination);
+        if (!rendered.copy(destination.fsName) || !destination.exists) {
+            throw new Error("Rendered PNG could not be copied to " + destination.fsName);
+        }
     }
     function collect(folder, root, output) {
         var entries = folder.getFiles();
@@ -229,19 +284,7 @@
         var queueStates = [];
         var renderComp = null;
         var renderItem = null;
-
-        function findPngTemplate(outputModule) {
-            var templates = outputModule.templates;
-            for (var i = 0; i < templates.length; i++) {
-                try {
-                    outputModule.applyTemplate(templates[i]);
-                    outputModule = renderItem.outputModule(1);
-                    var settings = outputModule.getSettings(GetSettingsFormat.STRING);
-                    if (/PNG/i.test(settings.Format) && /Alpha/i.test(settings.Channels)) { return templates[i]; }
-                } catch (error) {}
-            }
-            return null;
-        }
+        var tempPng = null;
 
         try {
             for (var queueIndex = 1; queueIndex <= queue.numItems; queueIndex++) {
@@ -250,37 +293,25 @@
             }
             renderComp = comp.duplicate();
             renderComp.name = "__onmk_comp_bookmark_thumbnail__";
-            var siblings = png.parent.getFiles(png.name + "*");
-            for (var siblingIndex = 0; siblingIndex < siblings.length; siblingIndex++) {
-                if (siblings[siblingIndex] instanceof File) { siblings[siblingIndex].remove(); }
-            }
+            tempPng = temporaryThumbnail("bookmark_" + comp.id);
+            removeOutputFamily(tempPng);
             renderItem = queue.items.add(renderComp);
             renderItem.timeSpanStart = comp.time;
             renderItem.timeSpanDuration = comp.frameDuration;
+            var template = findPngTemplate(renderItem);
+            if (!template) { throw new Error("PNG output module template not found. Create a PNG output module template in After Effects and try again."); }
             var outputModule = renderItem.outputModule(1);
-            var template = findPngTemplate(outputModule);
-            if (!template) { throw new Error("PNG + Alpha output template not found"); }
-            outputModule = renderItem.outputModule(1);
             outputModule.applyTemplate(template);
             outputModule = renderItem.outputModule(1);
-            outputModule.file = png;
+            outputModule.file = tempPng;
             queue.render();
-            var renderedFrames = png.parent.getFiles(png.name + "*");
-            var renderedFile = png.exists ? png : null;
-            for (var frameIndex = 0; frameIndex < renderedFrames.length; frameIndex++) {
-                if (renderedFrames[frameIndex] instanceof File && renderedFrames[frameIndex].fsName !== png.fsName) {
-                    renderedFile = renderedFrames[frameIndex];
-                    break;
-                }
-            }
-            if (!renderedFile || !renderedFile.exists) { throw new Error("Rendered PNG frame was not found"); }
-            if (renderedFile.fsName !== png.fsName && !renderedFile.rename(png.name)) {
-                throw new Error("Rendered PNG could not be renamed");
-            }
+            publishThumbnail(renderedFrame(tempPng), png);
+            removeOutputFamily(tempPng);
             return "Captured " + comp.name;
         } catch (error) {
             return "Error: " + error.message;
         } finally {
+            if (tempPng) { removeOutputFamily(tempPng); }
             if (renderItem) { try { renderItem.remove(); } catch (removeQueueError) {} }
             if (renderComp) { try { renderComp.remove(); } catch (removeCompError) {} }
             for (var restoreIndex = 1; restoreIndex <= queueStates.length; restoreIndex++) {
@@ -377,21 +408,7 @@
         var queueStates = [];
         var renderComp = null;
         var renderItem = null;
-
-        function findPngTemplate(outputModule) {
-            var templates = outputModule.templates;
-            for (var templateIndex = 0; templateIndex < templates.length; templateIndex++) {
-                try {
-                    outputModule.applyTemplate(templates[templateIndex]);
-                    outputModule = renderItem.outputModule(1);
-                    var settings = outputModule.getSettings(GetSettingsFormat.STRING);
-                    if (/PNG/i.test(settings.Format) && /Alpha/i.test(settings.Channels)) {
-                        return templates[templateIndex];
-                    }
-                } catch (templateError) {}
-            }
-            return null;
-        }
+        var tempPng = null;
 
         try {
             for (var queueIndex = 1; queueIndex <= queue.numItems; queueIndex++) {
@@ -416,41 +433,25 @@
                 }
             }
 
-            // Remove the previous thumbnail and any unfinished sequence frame
-            // with the same basename before rendering the replacement.
-            var siblings = png.parent.getFiles(png.name + "*");
-            for (var siblingIndex = 0; siblingIndex < siblings.length; siblingIndex++) {
-                if (siblings[siblingIndex] instanceof File) { siblings[siblingIndex].remove(); }
-            }
-
+            tempPng = temporaryThumbnail("preset");
+            removeOutputFamily(tempPng);
             renderItem = queue.items.add(renderComp);
             renderItem.timeSpanStart = comp.time;
             renderItem.timeSpanDuration = comp.frameDuration;
+            var pngTemplate = findPngTemplate(renderItem);
+            if (!pngTemplate) { throw new Error("PNG output module template not found. Create a PNG output module template in After Effects and try again."); }
             var outputModule = renderItem.outputModule(1);
-            var pngTemplate = findPngTemplate(outputModule);
-            if (!pngTemplate) { throw new Error("PNG + Alpha output template not found"); }
-            outputModule = renderItem.outputModule(1);
             outputModule.applyTemplate(pngTemplate);
             outputModule = renderItem.outputModule(1);
-            outputModule.file = png;
+            outputModule.file = tempPng;
             queue.render();
-
-            var renderedFrames = png.parent.getFiles(png.name + "*");
-            var renderedFile = png.exists ? png : null;
-            for (var frameIndex = 0; frameIndex < renderedFrames.length; frameIndex++) {
-                if (renderedFrames[frameIndex] instanceof File && renderedFrames[frameIndex].fsName !== png.fsName) {
-                    renderedFile = renderedFrames[frameIndex];
-                    break;
-                }
-            }
-            if (!renderedFile || !renderedFile.exists) { throw new Error("Rendered PNG frame was not found"); }
-            if (renderedFile.fsName !== png.fsName && !renderedFile.rename(png.name)) {
-                throw new Error("Rendered PNG could not be renamed");
-            }
+            publishThumbnail(renderedFrame(tempPng), png);
+            removeOutputFamily(tempPng);
             return useLayerIsolation ? "Captured selected layer" : "Captured composition";
         } catch (error) {
             return "Error: " + error.message;
         } finally {
+            if (tempPng) { removeOutputFamily(tempPng); }
             if (renderItem) { try { renderItem.remove(); } catch (removeQueueError) {} }
             if (renderComp) { try { renderComp.remove(); } catch (removeCompError) {} }
             for (var restoreIndex = 1; restoreIndex <= queueStates.length; restoreIndex++) {
